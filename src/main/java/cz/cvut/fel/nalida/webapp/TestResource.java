@@ -1,7 +1,6 @@
 package cz.cvut.fel.nalida.webapp;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Properties;
 import java.util.Random;
 import java.util.Set;
@@ -65,20 +64,14 @@ public class TestResource {
 			Tokenization tokenization = pickTokenization(tokenizations);
 			QueryPlan restQueryPlan = restQueryGenerator.generateQuery(tokenization);
 
-			List<String> xmlResponse;
+			String xmlResponse;
 			try {
 				xmlResponse = restQueryPlan.execute();
 			} catch (Exception e) {
 				throw new WebApplicationException(e, Response.status(Status.INTERNAL_SERVER_ERROR)
 						.entity("Communication with KOSapi failed.").build());
 			}
-
-			StringBuilder sb = new StringBuilder();
-			for (String responsePart : xmlResponse) {
-				sb.append(responsePart);
-				sb.append("\n\n");
-			}
-			return sb.toString();
+			return xmlResponse;
 		}
 	}
 
@@ -110,7 +103,7 @@ public class TestResource {
 			Tokenization tokenization = pickTokenization(tokenizations);
 			QueryPlan restQueryPlan = restQueryGenerator.generateQuery(tokenization);
 			QueryPlan sqlQueryPlan = sqlQueryGenerator.generateQuery(tokenization);
-			List<String> xmlResponse;
+			String xmlResponse;
 			try {
 				xmlResponse = restQueryPlan.execute();
 			} catch (Exception e) {
@@ -141,10 +134,7 @@ public class TestResource {
 
 			sb.append("Responses:".toUpperCase());
 			sb.append("\n");
-			for (String responsePart : xmlResponse) {
-				sb.append(responsePart);
-				sb.append("\n\n");
-			}
+			sb.append(xmlResponse);
 
 			return sb.toString();
 		}
