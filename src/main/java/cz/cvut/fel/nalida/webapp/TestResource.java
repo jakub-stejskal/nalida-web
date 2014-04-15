@@ -148,17 +148,10 @@ public class TestResource {
 	}
 
 	@GET
-	@Produces("application/xml")
-	@Path("/token")
-	public Tokenization getTokenization(@QueryParam("q") String query) {
-		if (query == null) {
-			throw new WebApplicationException(Response.status(Status.BAD_REQUEST).entity("No query submitted.").build());
-		} else {
-			Annotation annotatedQuery = syntacticAnalysis.process(query);
-			Set<Tokenization> tokenizations = semanticAnalysis.getTokenizations(annotatedQuery);
-			Tokenization tokenization = pickTokenization(tokenizations);
-			return tokenization;
-		}
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	@Path("/schema")
+	public Schema getSchema() {
+		return schema;
 	}
 
 	private Tokenization pickTokenization(Set<Tokenization> tokenizations) {
