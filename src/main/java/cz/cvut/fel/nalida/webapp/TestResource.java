@@ -1,5 +1,8 @@
 package cz.cvut.fel.nalida.webapp;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Properties;
 import java.util.Random;
@@ -10,6 +13,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
@@ -23,6 +27,7 @@ import cz.cvut.fel.nalida.SyntacticAnalysis;
 import cz.cvut.fel.nalida.Tokenization;
 import cz.cvut.fel.nalida.db.Lexicon;
 import cz.cvut.fel.nalida.db.QueryPlan;
+import cz.cvut.fel.nalida.db.Schema;
 import edu.stanford.nlp.pipeline.Annotation;
 
 @Singleton
@@ -34,14 +39,16 @@ public class TestResource {
 
 	private static QueryGenerator restQueryGenerator;
 	private static QueryGenerator sqlQueryGenerator;
-	private static Lexicon lexicon;
+	private static Schema schema;
 
 	public TestResource() throws Exception {
 
 		Properties properties = new Properties();
 		properties.load(this.getClass().getClassLoader().getResourceAsStream("nlpcore.properties"));
 
-		lexicon = new Lexicon("data/schema/");
+		InputStream input = new FileInputStream(new File("data/schema/schema.desc"));
+		schema = Schema.load(input);
+		Lexicon lexicon = new Lexicon(schema, "data/schema/");
 
 		syntacticAnalysis = new SyntacticAnalysis(properties, lexicon);
 		semanticAnalysis = new SemanticAnalysis(lexicon);
@@ -49,8 +56,8 @@ public class TestResource {
 		Properties props = new Properties();
 		props.load(this.getClass().getClassLoader().getResourceAsStream("db.properties"));
 
-		restQueryGenerator = new RestQueryGenerator(lexicon.getSchema(), props);
-		sqlQueryGenerator = new SqlQueryGenerator(lexicon.getSchema(), props);
+		restQueryGenerator = new RestQueryGenerator(schema, props);
+		sqlQueryGenerator = new SqlQueryGenerator(schema, props);
 	}
 
 	@GET
