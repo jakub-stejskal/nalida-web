@@ -19,15 +19,15 @@ import javax.ws.rs.core.Response.Status;
 
 import com.sun.jersey.spi.resource.Singleton;
 
-import cz.cvut.fel.nalida.QueryGenerator;
-import cz.cvut.fel.nalida.RestQueryGenerator;
-import cz.cvut.fel.nalida.SemanticAnalysis;
-import cz.cvut.fel.nalida.SqlQueryGenerator;
-import cz.cvut.fel.nalida.SyntacticAnalysis;
-import cz.cvut.fel.nalida.Tokenization;
-import cz.cvut.fel.nalida.db.Lexicon;
-import cz.cvut.fel.nalida.db.QueryPlan;
-import cz.cvut.fel.nalida.db.Schema;
+import cz.cvut.fel.nalida.Lexicon;
+import cz.cvut.fel.nalida.query.QueryGenerator;
+import cz.cvut.fel.nalida.query.QueryPlan;
+import cz.cvut.fel.nalida.query.rest.RestQueryGenerator;
+import cz.cvut.fel.nalida.query.sql.SqlQueryGenerator;
+import cz.cvut.fel.nalida.schema.Schema;
+import cz.cvut.fel.nalida.syntax.stanford.SyntacticAnalysis;
+import cz.cvut.fel.nalida.tokenization.Tokenizer;
+import cz.cvut.fel.nalida.tokenization.Tokenization;
 import edu.stanford.nlp.pipeline.Annotation;
 
 @Singleton
@@ -35,7 +35,7 @@ import edu.stanford.nlp.pipeline.Annotation;
 public class TestResource {
 
 	private static SyntacticAnalysis syntacticAnalysis;
-	private static SemanticAnalysis semanticAnalysis;
+	private static Tokenizer semanticAnalysis;
 
 	private static QueryGenerator restQueryGenerator;
 	private static QueryGenerator sqlQueryGenerator;
@@ -51,7 +51,7 @@ public class TestResource {
 		Lexicon lexicon = new Lexicon(schema, "data/schema/");
 
 		syntacticAnalysis = new SyntacticAnalysis(properties, lexicon);
-		semanticAnalysis = new SemanticAnalysis(lexicon);
+		semanticAnalysis = new Tokenizer(lexicon);
 
 		Properties props = new Properties();
 		props.load(this.getClass().getClassLoader().getResourceAsStream("db.properties"));
