@@ -1,10 +1,6 @@
 package cz.cvut.fel.nalida.webapp;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Properties;
 import java.util.Random;
 import java.util.Set;
 
@@ -19,45 +15,19 @@ import javax.ws.rs.core.Response.Status;
 
 import com.sun.jersey.spi.resource.Singleton;
 
-import cz.cvut.fel.nalida.Lexicon;
-import cz.cvut.fel.nalida.query.QueryGenerator;
+import cz.cvut.fel.nalida.Nalida;
 import cz.cvut.fel.nalida.query.QueryPlan;
-import cz.cvut.fel.nalida.query.rest.RestQueryGenerator;
-import cz.cvut.fel.nalida.query.sql.SqlQueryGenerator;
 import cz.cvut.fel.nalida.schema.Schema;
-import cz.cvut.fel.nalida.syntax.stanford.SyntacticAnalysis;
-import cz.cvut.fel.nalida.tokenization.Tokenizer;
 import cz.cvut.fel.nalida.tokenization.Tokenization;
-import edu.stanford.nlp.pipeline.Annotation;
 
 @Singleton
 @Path("/kos")
 public class TestResource {
 
-	private static SyntacticAnalysis syntacticAnalysis;
-	private static Tokenizer semanticAnalysis;
-
-	private static QueryGenerator restQueryGenerator;
-	private static QueryGenerator sqlQueryGenerator;
-	private static Schema schema;
+	Nalida core;
 
 	public TestResource() throws Exception {
-
-		Properties properties = new Properties();
-		properties.load(this.getClass().getClassLoader().getResourceAsStream("nlpcore.properties"));
-
-		InputStream input = new FileInputStream(new File("data/schema/schema.desc"));
-		schema = Schema.load(input);
-		Lexicon lexicon = new Lexicon(schema, "data/schema/");
-
-		syntacticAnalysis = new SyntacticAnalysis(properties, lexicon);
-		semanticAnalysis = new Tokenizer(lexicon);
-
-		Properties props = new Properties();
-		props.load(this.getClass().getClassLoader().getResourceAsStream("db.properties"));
-
-		restQueryGenerator = new RestQueryGenerator(schema, props);
-		sqlQueryGenerator = new SqlQueryGenerator(schema, props);
+		this.core = new Nalida();
 	}
 
 	@GET
@@ -66,10 +36,9 @@ public class TestResource {
 		if (query == null || query.trim().isEmpty()) {
 			throw new WebApplicationException(Response.status(Status.BAD_REQUEST).entity("No query submitted.").build());
 		} else {
-			Annotation annotatedQuery = syntacticAnalysis.process(query);
-			Set<Tokenization> tokenizations = semanticAnalysis.getTokenizations(annotatedQuery);
+			Set<Tokenization> tokenizations = this.core.getTokenizations(query);
 			Tokenization tokenization = pickTokenization(tokenizations);
-			QueryPlan restQueryPlan = restQueryGenerator.generateQuery(tokenization);
+			QueryPlan restQueryPlan = this.core.getRestQuery(tokenization);
 
 			String xmlResponse;
 			try {
@@ -89,10 +58,9 @@ public class TestResource {
 		if (query == null || query.trim().isEmpty()) {
 			throw new WebApplicationException(Response.status(Status.BAD_REQUEST).entity("No query submitted.").build());
 		} else {
-			Annotation annotatedQuery = syntacticAnalysis.process(query);
-			Set<Tokenization> tokenizations = semanticAnalysis.getTokenizations(annotatedQuery);
+			Set<Tokenization> tokenizations = this.core.getTokenizations(query);
 			Tokenization tokenization = pickTokenization(tokenizations);
-			QueryPlan sqlQueryPlan = sqlQueryGenerator.generateQuery(tokenization);
+			QueryPlan sqlQueryPlan = this.core.getSqlQuery(tokenization);
 
 			return sqlQueryPlan.toString();
 		}
@@ -105,11 +73,10 @@ public class TestResource {
 		if (query == null || query.trim().isEmpty()) {
 			throw new WebApplicationException(Response.status(Status.BAD_REQUEST).entity("No query submitted.").build());
 		} else {
-			Annotation annotatedQuery = syntacticAnalysis.process(query);
-			Set<Tokenization> tokenizations = semanticAnalysis.getTokenizations(annotatedQuery);
+			Set<Tokenization> tokenizations = this.core.getTokenizations(query);
 			Tokenization tokenization = pickTokenization(tokenizations);
-			QueryPlan restQueryPlan = restQueryGenerator.generateQuery(tokenization);
-			QueryPlan sqlQueryPlan = sqlQueryGenerator.generateQuery(tokenization);
+			QueryPlan restQueryPlan = this.core.getRestQuery(tokenization);
+			QueryPlan sqlQueryPlan = this.core.getSqlQuery(tokenization);
 			String xmlResponse;
 			try {
 				xmlResponse = restQueryPlan.execute();
@@ -151,7 +118,7 @@ public class TestResource {
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	@Path("/schema")
 	public Schema getSchema() {
-		return schema;
+		return this.core.getSchema();
 	}
 
 	private Tokenization pickTokenization(Set<Tokenization> tokenizations) {
