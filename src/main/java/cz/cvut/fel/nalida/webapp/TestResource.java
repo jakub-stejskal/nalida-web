@@ -31,7 +31,7 @@ public class TestResource {
 	}
 
 	@GET
-	@Produces("text/plain")
+	@Produces(MediaType.APPLICATION_XML)
 	public String getResponse(@QueryParam("q") String query) {
 		if (query == null || query.trim().isEmpty()) {
 			throw new WebApplicationException(Response.status(Status.BAD_REQUEST).entity("No query submitted.").build());
@@ -53,7 +53,7 @@ public class TestResource {
 
 	@GET
 	@Path("/sql")
-	@Produces("text/plain")
+	@Produces(MediaType.TEXT_PLAIN)
 	public String getSqlQuery(@QueryParam("q") String query) {
 		if (query == null || query.trim().isEmpty()) {
 			throw new WebApplicationException(Response.status(Status.BAD_REQUEST).entity("No query submitted.").build());
@@ -68,7 +68,7 @@ public class TestResource {
 
 	@GET
 	@Path("/debug")
-	@Produces("text/plain")
+	@Produces(MediaType.TEXT_PLAIN)
 	public String getDebug(@QueryParam("q") String query) {
 		if (query == null || query.trim().isEmpty()) {
 			throw new WebApplicationException(Response.status(Status.BAD_REQUEST).entity("No query submitted.").build());
@@ -115,8 +115,8 @@ public class TestResource {
 	}
 
 	@GET
-	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	@Path("/schema")
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	public Schema getSchema() {
 		return this.core.getSchema();
 	}

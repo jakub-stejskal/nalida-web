@@ -1,0 +1,16 @@
+body {
+  padding-top: 50px;
+}
+.starter-template {
+  padding: 40px 15px;
+  text-align: center;
+}
+li {
+	text-align: left;
+}
+label {
+	width: 250px;
+}
+input[type=text] {
+	width: 100%;
+}
