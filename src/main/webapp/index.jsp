@@ -10,11 +10,8 @@
 
   <title>NaLIDa - a natural language interface for database</title>
 
-  <!-- Bootstrap core CSS -->
   <link href="bootstrap.min.css" rel="stylesheet">
-
-  <!-- Custom styles for this template -->
-  <link href="starter-template.css" rel="stylesheet">
+  <link href="nalida.css" rel="stylesheet">
 
   <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!--[if lt IE 9]>
@@ -52,7 +49,7 @@
         <div class="page-header">
           <h1>Welcome to NaLIDa <small>a Natural Language Interface for Database</small></h1>
           </div>
-          <p>Submit a natural language question in English. Use either a wh-question or noun phrase.</p>
+          <p>Submit a natural language question in English. Use either a wh-question or a noun phrase.</p>
 
             <div class="row">
                 <div class="col-md-4">
@@ -67,8 +64,8 @@
             </form>
             <h4>Examples</h4>
             <div class="list-group">
-              <a class="list-group-item" href="http://localhost:8080/nalida-web/api/kos/?q=What%20is%20phone%20of%20Jan%20%C5%A0ediv%C3%BD?">What is phone of Jan Šedivý?</a>
-              <a class="list-group-item" href="http://localhost:8080/nalida-web/api/kos/?q=Which%20teachers%20are%20from%20division%2013133?">Which teachers are from division 13133?</a>
+              <a data-toggle="modal" data-target="#myModal" class="list-group-item" href="http://localhost:8080/nalida-web/api/kos/?q=What%20is%20phone%20of%20Jan%20%C5%A0ediv%C3%BD?">What is phone of Jan Šedivý?</a>
+              <a data-toggle="modal" data-target="#myModal" class="list-group-item" href="http://localhost:8080/nalida-web/api/kos/?q=Which%20teachers%20are%20from%20division%2013133?">Which teachers are from division 13133?</a>
             </div>
             </div>
 
@@ -84,8 +81,8 @@
             </form>
             <h4>Examples</h4>
             <div class="list-group">
-              <a class="list-group-item" href="http://localhost:8080/nalida-web/api/kos/sql?q=What%20is%20phone%20of%20Jan%20%C5%A0ediv%C3%BD?">What is phone of Jan Šedivý?</a>
-              <a class="list-group-item" href="http://localhost:8080/nalida-web/api/kos/sql?q=Which%20teachers%20are%20from%20division%2013133?">Which teachers are from division 13133?</a>
+              <a data-toggle="modal" data-target="#myModal" class="list-group-item" href="http://localhost:8080/nalida-web/api/kos/sql?q=What%20is%20phone%20of%20Jan%20%C5%A0ediv%C3%BD?">What is phone of Jan Šedivý?</a>
+              <a data-toggle="modal" data-target="#myModal" class="list-group-item" href="http://localhost:8080/nalida-web/api/kos/sql?q=Which%20teachers%20are%20from%20division%2013133?">Which teachers are from division 13133?</a>
             </div >
             </div>
 
@@ -101,19 +98,44 @@
             </form>
             <h4>Examples</h4>
             <div class="list-group">
-              <a class="list-group-item" href="http://localhost:8080/nalida-web/api/kos/debug?q=What%20is%20phone%20of%20Jan%20%C5%A0ediv%C3%BD?">What is phone of Jan Šedivý?</a>
-              <a class="list-group-item" href="http://localhost:8080/nalida-web/api/kos/debug?q=Which%20teachers%20are%20from%20division%2013133?">Which teachers are from division 13133?</a>
+              <a data-toggle="modal" data-target="#myModal" class="list-group-item" href="http://localhost:8080/nalida-web/api/kos/debug?q=What%20is%20phone%20of%20Jan%20%C5%A0ediv%C3%BD?">What is phone of Jan Šedivý?</a>
+              <a data-toggle="modal" data-target="#myModal" class="list-group-item" href="http://localhost:8080/nalida-web/api/kos/debug?q=Which%20teachers%20are%20from%20division%2013133?">Which teachers are from division 13133?</a>
             </div>
             </div>
-          </div>
+          </div><!-- row -->
           </div>
         </div><!-- /.container -->
+        
+        <!-- Modal -->
+		<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+		  <div class="modal-dialog">
+		    <div class="modal-content">
+		      <div class="modal-header">
+		        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+		        <h4 class="modal-title" id="myModalLabel">Loading</h4>
+		      </div>
+		      <div class="modal-body">
+		        ...
+		      </div>
+		    </div><!-- /.modal-content -->
+		  </div><!-- /.modal-dialog -->
+		</div><!-- /.modal -->
 
-
-    <!-- Bootstrap core JavaScript
-    ================================================== -->
-    <!-- Placed at the end of the document so the pages load faster -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
     <script src="bootstrap.min.js"></script>
+    <script>
+    $('body').on('hidden.bs.modal', '.modal', function () {
+    	  $(this).removeData('bs.modal');
+    	});
+    
+    $('form').submit(function (e) {
+        e.preventDefault();
+        console.log(e.target.action + "?" + $(e.target).serialize());
+    	
+        $("#myModal").modal({
+            remote : e.target.action + "?" + $(e.target).serialize()
+        });
+    });
+    </script>
   </body>
   </html>

@@ -11,6 +11,9 @@ public class BadURIExceptionMapper implements ExceptionMapper<NotFoundException>
 
 	@Override
 	public Response toResponse(NotFoundException exception) {
-		return Response.status(Response.Status.NOT_FOUND).entity("URI " + exception.getNotFoundUri() + " not found.	").build();
+		return Response.status(Response.Status.NOT_FOUND)
+				.entity(new ErrorBean("URI " + exception.getNotFoundUri() + " not found.", Response.Status.NOT_FOUND.getStatusCode()))
+				.build();
+
 	}
 }
