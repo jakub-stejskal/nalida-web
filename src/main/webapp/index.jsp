@@ -49,14 +49,24 @@
         <div class="page-header">
           <h1>Welcome to NaLIDa <small>a Natural Language Interface for Database</small></h1>
           </div>
-          <p>Submit a natural language question in English. Use either a wh-question or a noun phrase.</p>
+          <p class="lead">
+            Ask a question from the domain of KOS, information system of CTU in Prague.
+            NaLIDa knows stuff about students, teachers, divisions, courses, parallels and exams.
+          </p>
+          <p class="lead">
+            Check the <a href="api/kos/schema">enumeration of supported entities, attributes
+            and their natural language tokens</a> in XML format for inspiration.
+            Click on the examples or submit your own natural language question in English. Use either a wh-question or a noun phrase.
+          </p>
+          
 
             <div class="row">
                 <div class="col-md-4">
             <h3>KOSapi response</h3>
-            <form name="input" action="http://localhost:8080/nalida-web/api/kos" method="get">
+            <form name="input" action="api/kos" method="get">
             <div class="input-group">
               <input class="form-control" type="text" name="q">
+              <input type="hidden" name="t" value="-1">
               <span class="input-group-btn">
                 <input class="btn btn-default" type="submit" value="Submit">
               </span>
@@ -64,16 +74,17 @@
             </form>
             <h4>Examples</h4>
             <div class="list-group">
-              <a data-toggle="modal" data-target="#myModal" class="list-group-item" href="http://localhost:8080/nalida-web/api/kos/?q=What%20is%20phone%20of%20Jan%20%C5%A0ediv%C3%BD?">What is phone of Jan Šedivý?</a>
-              <a data-toggle="modal" data-target="#myModal" class="list-group-item" href="http://localhost:8080/nalida-web/api/kos/?q=Which%20teachers%20are%20from%20division%2013133?">Which teachers are from division 13133?</a>
+              <a data-toggle="modal" data-target="#myModal" class="list-group-item" href="api/kos/?t=-1&q=What%20is%20phone%20of%20Jan%20%C5%A0ediv%C3%BD?">What is phone of Jan Šedivý?</a>
+              <a data-toggle="modal" data-target="#myModal" class="list-group-item" href="api/kos/?t=-1&q=Which%20teachers%20are%20from%20division%2013133?">Which teachers are from division 13133?</a>
             </div>
             </div>
 
             <div class="col-md-4">
             <h3>SQL query</h3>
-            <form name="input" action="http://localhost:8080/nalida-web/api/kos/sql" method="get">
+            <form name="input" action="api/kos/sql" method="get">
             <div class="input-group">
 		      <input class="form-control" type="text" name="q">
+		      <input type="hidden" name="t" value="-1">
 		      <span class="input-group-btn">
 		        <input class="btn btn-default" type="submit" value="Submit">
 		      </span>
@@ -81,16 +92,17 @@
             </form>
             <h4>Examples</h4>
             <div class="list-group">
-              <a data-toggle="modal" data-target="#myModal" class="list-group-item" href="http://localhost:8080/nalida-web/api/kos/sql?q=What%20is%20phone%20of%20Jan%20%C5%A0ediv%C3%BD?">What is phone of Jan Šedivý?</a>
-              <a data-toggle="modal" data-target="#myModal" class="list-group-item" href="http://localhost:8080/nalida-web/api/kos/sql?q=Which%20teachers%20are%20from%20division%2013133?">Which teachers are from division 13133?</a>
+              <a data-toggle="modal" data-target="#myModal" class="list-group-item" href="api/kos/sql?t=-1&q=What%20is%20phone%20of%20Jan%20%C5%A0ediv%C3%BD?">What is phone of Jan Šedivý?</a>
+              <a data-toggle="modal" data-target="#myModal" class="list-group-item" href="api/kos/sql?t=-1&q=Which%20teachers%20are%20from%20division%2013133?">Which teachers are from division 13133?</a>
             </div >
             </div>
 
             <div class="col-md-4">
             <h3>Detailed intermediate outputs</h3>
-            <form name="input" action="http://localhost:8080/nalida-web/api/kos/debug" method="get">
+            <form name="input" action="api/kos/debug" method="get">
             <div class="input-group">
               <input class="form-control" type="text" name="q">
+              <input type="hidden" name="t" value="-1">
               <span class="input-group-btn">
                 <input class="btn btn-default" type="submit" value="Submit">
               </span>
@@ -98,8 +110,8 @@
             </form>
             <h4>Examples</h4>
             <div class="list-group">
-              <a data-toggle="modal" data-target="#myModal" class="list-group-item" href="http://localhost:8080/nalida-web/api/kos/debug?q=What%20is%20phone%20of%20Jan%20%C5%A0ediv%C3%BD?">What is phone of Jan Šedivý?</a>
-              <a data-toggle="modal" data-target="#myModal" class="list-group-item" href="http://localhost:8080/nalida-web/api/kos/debug?q=Which%20teachers%20are%20from%20division%2013133?">Which teachers are from division 13133?</a>
+              <a data-toggle="modal" data-target="#myModal" class="list-group-item" href="api/kos/debug?t=-1&q=What%20is%20phone%20of%20Jan%20%C5%A0ediv%C3%BD?">What is phone of Jan Šedivý?</a>
+              <a data-toggle="modal" data-target="#myModal" class="list-group-item" href="api/kos/debug?t=-1&q=Which%20teachers%20are%20from%20division%2013133?">Which teachers are from division 13133?</a>
             </div>
             </div>
           </div><!-- row -->
