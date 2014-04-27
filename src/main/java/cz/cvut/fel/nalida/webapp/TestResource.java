@@ -17,9 +17,9 @@ import javax.ws.rs.core.Response.Status;
 import com.sun.jersey.spi.resource.Singleton;
 
 import cz.cvut.fel.nalida.Nalida;
+import cz.cvut.fel.nalida.interpretation.Interpretation;
 import cz.cvut.fel.nalida.query.QueryPlan;
 import cz.cvut.fel.nalida.schema.Schema;
-import cz.cvut.fel.nalida.tokenization.Tokenization;
 
 @Singleton
 @Path("/kos")
@@ -33,25 +33,25 @@ public class TestResource {
 
 	@GET
 	@Produces(MediaType.APPLICATION_XML)
-	public String getResponse(@QueryParam("q") String query, @QueryParam("t") Integer tokenizationIndex) {
+	public String getResponse(@QueryParam("q") String query, @QueryParam("t") Integer interpretationIndex) {
 		if (query == null || query.trim().isEmpty()) {
 			throw new NalidaException("No query submitted.");
 		} else {
-			Set<Tokenization> tokenizations = this.core.getTokenizations(query);
-			Tokenization tokenization;
-			if (tokenizations.isEmpty()) {
+			Set<Interpretation> interpretations = this.core.getInterpretations(query);
+			Interpretation interpretation;
+			if (interpretations.isEmpty()) {
 				throw new NalidaException("Failed to translate query. Try to reformulate it.");
-			} else if (tokenizations.size() == 1) {
-				tokenization = tokenizations.iterator().next();
+			} else if (interpretations.size() == 1) {
+				interpretation = interpretations.iterator().next();
 			} else {
-				if (tokenizationIndex != null) {
-					tokenization = pickTokenization(tokenizations, tokenizationIndex);
+				if (interpretationIndex != null) {
+					interpretation = pickInterpretation(interpretations, interpretationIndex);
 				} else {
-					return tokenizationsToXML(tokenizations);
+					return interpretationsToXML(interpretations);
 				}
 			}
 
-			QueryPlan restQueryPlan = this.core.getRestQuery(tokenization);
+			QueryPlan restQueryPlan = this.core.getRestQuery(interpretation);
 			String xmlResponse;
 			try {
 				xmlResponse = restQueryPlan.execute();
@@ -69,9 +69,9 @@ public class TestResource {
 		if (query == null || query.trim().isEmpty()) {
 			throw new NalidaException("No query submitted.");
 		} else {
-			Set<Tokenization> tokenizations = this.core.getTokenizations(query);
-			Tokenization tokenization = pickTokenization(tokenizations);
-			QueryPlan sqlQueryPlan = this.core.getSqlQuery(tokenization);
+			Set<Interpretation> interpretations = this.core.getInterpretations(query);
+			Interpretation interpretation = pickTokenization(interpretations);
+			QueryPlan sqlQueryPlan = this.core.getSqlQuery(interpretation);
 
 			return sqlQueryPlan.toString();
 		}
@@ -84,10 +84,10 @@ public class TestResource {
 		if (query == null || query.trim().isEmpty()) {
 			throw new NalidaException("No query submitted.");
 		} else {
-			Set<Tokenization> tokenizations = this.core.getTokenizations(query);
-			Tokenization tokenization = pickTokenization(tokenizations);
-			QueryPlan restQueryPlan = this.core.getRestQuery(tokenization);
-			QueryPlan sqlQueryPlan = this.core.getSqlQuery(tokenization);
+			Set<Interpretation> interpretations = this.core.getInterpretations(query);
+			Interpretation interpretation = pickTokenization(interpretations);
+			QueryPlan restQueryPlan = this.core.getRestQuery(interpretation);
+			QueryPlan sqlQueryPlan = this.core.getSqlQuery(interpretation);
 			String xmlResponse;
 			try {
 				xmlResponse = restQueryPlan.execute();
@@ -103,7 +103,7 @@ public class TestResource {
 
 			sb.append("Tokenization:".toUpperCase());
 			sb.append("\n");
-			sb.append(tokenization.toString());
+			sb.append(interpretation.toString());
 			sb.append("\n\n");
 
 			sb.append("SQL Query:".toUpperCase());
@@ -126,9 +126,9 @@ public class TestResource {
 
 	@GET
 	@Produces(MediaType.TEXT_HTML)
-	public String getHTMLResponse(@QueryParam("q") String query, @QueryParam("t") Integer tokenizationIndex) {
+	public String getHTMLResponse(@QueryParam("q") String query, @QueryParam("t") Integer interpretationIndex) {
 		try {
-			return wrapInHTML("KOSapi response", getResponse(query, tokenizationIndex));
+			return wrapInHTML("KOSapi response", getResponse(query, interpretationIndex));
 		} catch (NalidaException e) {
 			return wrapInHTML("Error", e.getMessage());
 		}
@@ -163,20 +163,23 @@ public class TestResource {
 		return this.core.getSchema();
 	}
 
-	private Tokenization pickTokenization(Set<Tokenization> tokenizations) {
-		ArrayList<Tokenization> list = new ArrayList<>(tokenizations);
+	private Interpretation pickTokenization(Set<Interpretation> interpretations) {
+		ArrayList<Interpretation> list = new ArrayList<>(interpretations);
 		return list.get(new Random().nextInt(list.size()));
 	}
 
-	private Tokenization pickTokenization(Set<Tokenization> tokenizations, Integer tokenizationIndex) {
-		return tokenizationToList(tokenizations).get(tokenizationIndex.intValue());
+	private Interpretation pickInterpretation(Set<Interpretation> interpretations, Integer interpretationIndex) {
+		if (interpretationIndex.intValue() < 0) {
+			return pickTokenization(interpretations);
+		}
+		return interpretationToList(interpretations).get(interpretationIndex.intValue());
 	}
 
-	private List<Tokenization> tokenizationToList(Set<Tokenization> tokenizations) {
-		ArrayList<Tokenization> list = new ArrayList<>(tokenizations);
-		Collections.sort(list, new Comparator<Tokenization>() {
+	private List<Interpretation> interpretationToList(Set<Interpretation> interpretations) {
+		ArrayList<Interpretation> list = new ArrayList<>(interpretations);
+		Collections.sort(list, new Comparator<Interpretation>() {
 			@Override
-			public int compare(Tokenization o1, Tokenization o2) {
+			public int compare(Interpretation o1, Interpretation o2) {
 				return o1.getTokens().toString().compareTo(o2.getTokens().toString());
 			}
 		});
@@ -188,19 +191,19 @@ public class TestResource {
 				+ "</h4></div><div class=\"modal-body\"><textarea disabled>" + body + "</textarea></div>";
 	}
 
-	private String tokenizationsToXML(Set<Tokenization> tokenizations) {
+	private String interpretationsToXML(Set<Interpretation> interpretations) {
 		StringBuilder sb = new StringBuilder();
 
-		sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?><tokenizations>");
+		sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?><interpretations>\n");
 		int id = 0;
-		for (Tokenization tokenization : tokenizationToList(tokenizations)) {
-			sb.append("<tokenization><id>");
+		for (Interpretation interpretation : interpretationToList(interpretations)) {
+			sb.append("<interpretation><id>");
 			sb.append(id++);
 			sb.append("</id><tokens>");
-			sb.append(tokenization.getElements().toString());
-			sb.append("</tokens></tokenization>");
+			sb.append(interpretation.getElements().toString());
+			sb.append("</tokens></interpretation>\n");
 		}
-		sb.append("</tokenizations>");
+		sb.append("</interpretations>");
 		return sb.toString();
 	}
 }
