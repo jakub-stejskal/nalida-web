@@ -11,9 +11,11 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response.Status;
 
+import com.sun.jersey.api.core.HttpContext;
 import com.sun.jersey.spi.resource.Singleton;
 
 import cz.cvut.fel.nalida.Nalida;
@@ -25,6 +27,9 @@ import cz.cvut.fel.nalida.schema.Schema;
 @Path("/kos")
 public class TestResource {
 
+	private static final String INTERPRETATION_PARAM = "t";
+	private static final String QUERY_PARAM = "q";
+	private static final boolean RANDOM_DISAMBIGUATION = false;
 	Nalida core;
 
 	public TestResource() throws Exception {
@@ -33,21 +38,24 @@ public class TestResource {
 
 	@GET
 	@Produces(MediaType.APPLICATION_XML)
-	public String getResponse(@QueryParam("q") String query, @QueryParam("t") Integer interpretationIndex) {
+	public String getResponse(@Context HttpContext context, @QueryParam(QUERY_PARAM) String query,
+			@QueryParam(INTERPRETATION_PARAM) Integer interpretationIndex) {
+
 		if (query == null || query.trim().isEmpty()) {
 			throw new NalidaException("No query submitted.");
 		} else {
 			Set<Interpretation> interpretations = this.core.getInterpretations(query);
 			Interpretation interpretation;
 			if (interpretations.isEmpty()) {
-				throw new NalidaException("Failed to translate query. Try to reformulate it.");
+				throw new NalidaException("Failed to translate query \"" + query + "\". Try to reformulate it.");
 			} else if (interpretations.size() == 1) {
 				interpretation = interpretations.iterator().next();
 			} else {
 				if (interpretationIndex != null) {
 					interpretation = pickInterpretation(interpretations, interpretationIndex);
 				} else {
-					return interpretationsToXML(interpretations);
+					String uri = context.getRequest().getRequestUri().toASCIIString();
+					return interpretationsToXML(query, uri, interpretations);
 				}
 			}
 
@@ -64,28 +72,54 @@ public class TestResource {
 
 	@GET
 	@Path("/sql")
-	@Produces(MediaType.TEXT_PLAIN)
-	public String getSqlQuery(@QueryParam("q") String query) {
+	@Produces(MediaType.APPLICATION_XML)
+	public String getSqlQuery(@Context HttpContext context, @QueryParam(QUERY_PARAM) String query,
+			@QueryParam(INTERPRETATION_PARAM) Integer interpretationIndex) {
 		if (query == null || query.trim().isEmpty()) {
 			throw new NalidaException("No query submitted.");
 		} else {
 			Set<Interpretation> interpretations = this.core.getInterpretations(query);
-			Interpretation interpretation = pickTokenization(interpretations);
-			QueryPlan sqlQueryPlan = this.core.getSqlQuery(interpretation);
+			Interpretation interpretation;
+			if (interpretations.isEmpty()) {
+				throw new NalidaException("Failed to translate query \"" + query + "\". Try to reformulate it.");
+			} else if (interpretations.size() == 1) {
+				interpretation = interpretations.iterator().next();
+			} else {
+				if (interpretationIndex != null) {
+					interpretation = pickInterpretation(interpretations, interpretationIndex);
+				} else {
+					String uri = context.getRequest().getRequestUri().toASCIIString();
+					return interpretationsToXML(query, uri, interpretations);
+				}
+			}
 
-			return sqlQueryPlan.toString();
+			return sqlQueryPlanToXML(this.core.getSqlQuery(interpretation));
 		}
 	}
 
 	@GET
 	@Path("/debug")
 	@Produces(MediaType.TEXT_PLAIN)
-	public String getDebug(@QueryParam("q") String query) {
+	public String getDebug(@Context HttpContext context, @QueryParam(QUERY_PARAM) String query,
+			@QueryParam(INTERPRETATION_PARAM) Integer interpretationIndex) {
 		if (query == null || query.trim().isEmpty()) {
 			throw new NalidaException("No query submitted.");
 		} else {
 			Set<Interpretation> interpretations = this.core.getInterpretations(query);
-			Interpretation interpretation = pickTokenization(interpretations);
+			Interpretation interpretation;
+			if (interpretations.isEmpty()) {
+				throw new NalidaException("Failed to translate query \"" + query + "\". Try to reformulate it.");
+			} else if (interpretations.size() == 1) {
+				interpretation = interpretations.iterator().next();
+			} else {
+				if (interpretationIndex != null) {
+					interpretation = pickInterpretation(interpretations, interpretationIndex);
+				} else {
+					String uri = context.getRequest().getRequestUri().toASCIIString();
+					return interpretationsToXML(query, uri, interpretations);
+				}
+			}
+
 			QueryPlan restQueryPlan = this.core.getRestQuery(interpretation);
 			QueryPlan sqlQueryPlan = this.core.getSqlQuery(interpretation);
 			String xmlResponse;
@@ -101,7 +135,7 @@ public class TestResource {
 			sb.append(query);
 			sb.append("\n\n");
 
-			sb.append("Tokenization:".toUpperCase());
+			sb.append("Interpretation:".toUpperCase());
 			sb.append("\n");
 			sb.append(interpretation.toString());
 			sb.append("\n\n");
@@ -116,7 +150,7 @@ public class TestResource {
 			sb.append(restQueryPlan);
 			sb.append("\n\n");
 
-			sb.append("Responses:".toUpperCase());
+			sb.append("Response:".toUpperCase());
 			sb.append("\n");
 			sb.append(xmlResponse);
 
@@ -126,9 +160,10 @@ public class TestResource {
 
 	@GET
 	@Produces(MediaType.TEXT_HTML)
-	public String getHTMLResponse(@QueryParam("q") String query, @QueryParam("t") Integer interpretationIndex) {
+	public String getHTMLResponse(@Context HttpContext context, @QueryParam(QUERY_PARAM) String query,
+			@QueryParam(INTERPRETATION_PARAM) Integer interpretationIndex) {
 		try {
-			return wrapInHTML("KOSapi response", getResponse(query, interpretationIndex));
+			return wrapInHTML("KOSapi response", getResponse(context, query, interpretationIndex));
 		} catch (NalidaException e) {
 			return wrapInHTML("Error", e.getMessage());
 		}
@@ -137,9 +172,10 @@ public class TestResource {
 	@GET
 	@Path("/sql")
 	@Produces(MediaType.TEXT_HTML)
-	public String getHTMLSqlQuery(@QueryParam("q") String query) {
+	public String getHTMLSqlQuery(@Context HttpContext context, @QueryParam(QUERY_PARAM) String query,
+			@QueryParam(INTERPRETATION_PARAM) Integer interpretationIndex) {
 		try {
-			return wrapInHTML("SQL query", getSqlQuery(query));
+			return wrapInHTML("SQL query", getSqlQuery(context, query, interpretationIndex));
 		} catch (NalidaException e) {
 			return wrapInHTML("Error", e.getMessage());
 		}
@@ -148,9 +184,10 @@ public class TestResource {
 	@GET
 	@Path("/debug")
 	@Produces(MediaType.TEXT_HTML)
-	public String getHTMLDebug(@QueryParam("q") String query) {
+	public String getHTMLDebug(@Context HttpContext context, @QueryParam(QUERY_PARAM) String query,
+			@QueryParam(INTERPRETATION_PARAM) Integer interpretationIndex) {
 		try {
-			return wrapInHTML("Detailed intermediate outputs", getDebug(query));
+			return wrapInHTML("Detailed intermediate outputs", getDebug(context, query, interpretationIndex));
 		} catch (NalidaException e) {
 			return wrapInHTML("Error", e.getMessage());
 		}
@@ -163,14 +200,15 @@ public class TestResource {
 		return this.core.getSchema();
 	}
 
-	private Interpretation pickTokenization(Set<Interpretation> interpretations) {
+	private Interpretation pickInterpretation(Set<Interpretation> interpretations) {
 		ArrayList<Interpretation> list = new ArrayList<>(interpretations);
-		return list.get(new Random().nextInt(list.size()));
+		int pickedIndex = RANDOM_DISAMBIGUATION ? new Random().nextInt(list.size()) : 0;
+		return list.get(pickedIndex);
 	}
 
 	private Interpretation pickInterpretation(Set<Interpretation> interpretations, Integer interpretationIndex) {
 		if (interpretationIndex.intValue() < 0) {
-			return pickTokenization(interpretations);
+			return pickInterpretation(interpretations);
 		}
 		return interpretationToList(interpretations).get(interpretationIndex.intValue());
 	}
@@ -188,20 +226,26 @@ public class TestResource {
 
 	private String wrapInHTML(String title, String body) {
 		return "<div class=\"modal-header\"><h4 class=\"modal-title\">" + title
-				+ "</h4></div><div class=\"modal-body\"><textarea disabled>" + body + "</textarea></div>";
+				+ "</h4></div><div class=\"modal-body\"><textarea style=\"width:100%;height:40em\" disabled>" + body + "</textarea></div>";
 	}
 
-	private String interpretationsToXML(Set<Interpretation> interpretations) {
+	private String sqlQueryPlanToXML(QueryPlan queryPlan) {
+		return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<sql>" + queryPlan.toString() + "</sql>";
+	}
+
+	private String interpretationsToXML(String query, String uri, Set<Interpretation> interpretations) {
 		StringBuilder sb = new StringBuilder();
 
-		sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?><interpretations>\n");
+		sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<query>");
+		sb.append(query);
+		sb.append("</query>\n<interpretations>\n");
 		int id = 0;
 		for (Interpretation interpretation : interpretationToList(interpretations)) {
-			sb.append("<interpretation><id>");
-			sb.append(id++);
-			sb.append("</id><tokens>");
+			sb.append("<interpretation>\n\t<link href=\"");
+			sb.append(uri + '&' + INTERPRETATION_PARAM + '=' + id++);
+			sb.append("\" />\n\t<tokens>");
 			sb.append(interpretation.getElements().toString());
-			sb.append("</tokens></interpretation>\n");
+			sb.append("</tokens>\n</interpretation>\n");
 		}
 		sb.append("</interpretations>");
 		return sb.toString();

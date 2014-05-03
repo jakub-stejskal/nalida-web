@@ -66,11 +66,11 @@
             <form name="input" action="api/kos" method="get">
             <div class="input-group">
               <input class="form-control" type="text" name="q">
-              <input type="hidden" name="t" value="-1">
               <span class="input-group-btn">
-                <input class="btn btn-default" type="submit" value="Submit">
+                <input class="btn btn-primary" type="submit" value="Submit">
               </span>
             </div>
+            <label><input type="checkbox" name="t" value="-1"> auto-disambiguate</label>            
             </form>
             <h4>Examples</h4>
             <div class="list-group">
@@ -84,11 +84,11 @@
             <form name="input" action="api/kos/sql" method="get">
             <div class="input-group">
 		      <input class="form-control" type="text" name="q">
-		      <input type="hidden" name="t" value="-1">
 		      <span class="input-group-btn">
-		        <input class="btn btn-default" type="submit" value="Submit">
+		        <input class="btn btn-primary" type="submit" value="Submit">
 		      </span>
 		    </div>
+            <label><input type="checkbox" name="t" value="-1"> auto-disambiguate</label>
             </form>
             <h4>Examples</h4>
             <div class="list-group">
@@ -102,11 +102,11 @@
             <form name="input" action="api/kos/debug" method="get">
             <div class="input-group">
               <input class="form-control" type="text" name="q">
-              <input type="hidden" name="t" value="-1">
               <span class="input-group-btn">
-                <input class="btn btn-default" type="submit" value="Submit">
+                <input class="btn btn-primary" type="submit" value="Submit">
               </span>
             </div>
+            <label><input type="checkbox" name="t" value="-1"> auto-disambiguate</label>
             </form>
             <h4>Examples</h4>
             <div class="list-group">
