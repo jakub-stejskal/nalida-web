@@ -14,7 +14,7 @@ import cz.cvut.fel.nalida.interpretation.Interpretation;
 import cz.cvut.fel.nalida.query.QueryPlan;
 
 @Singleton
-@Path("/kos/sql")
+@Path("kos/sql")
 public class SqlResource extends AbstractResource {
 
 	public SqlResource() throws Exception {

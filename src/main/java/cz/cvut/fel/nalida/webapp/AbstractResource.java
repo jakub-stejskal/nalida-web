@@ -30,7 +30,7 @@ abstract public class AbstractResource {
 			Set<Interpretation> interpretations = this.core.getInterpretations(query);
 			Interpretation interpretation;
 			if (interpretations.isEmpty()) {
-				throw new NalidaException("Failed to translate query \"" + query + "\". Try to reformulate it.");
+				throw new NalidaException("Failed to translate query '" + query + "'. Try to reformulate it.");
 			} else if (interpretations.size() == 1) {
 				interpretation = interpretations.iterator().next();
 			} else {
@@ -49,7 +49,7 @@ abstract public class AbstractResource {
 	abstract protected String evaluateInterpretation(String query, Interpretation interpretation);
 
 	private Interpretation pickInterpretation(Set<Interpretation> interpretations) {
-		ArrayList<Interpretation> list = new ArrayList<>(interpretations);
+		List<Interpretation> list = interpretationToList(interpretations);
 		int pickedIndex = RANDOM_DISAMBIGUATION ? new Random().nextInt(list.size()) : 0;
 		return list.get(pickedIndex);
 	}

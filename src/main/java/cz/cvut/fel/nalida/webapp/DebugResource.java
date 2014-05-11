@@ -15,7 +15,7 @@ import cz.cvut.fel.nalida.interpretation.Interpretation;
 import cz.cvut.fel.nalida.query.QueryPlan;
 
 @Singleton
-@Path("/kos/debug")
+@Path("kos/debug")
 public class DebugResource extends AbstractResource {
 
 	public DebugResource() throws Exception {

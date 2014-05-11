@@ -16,7 +16,7 @@ import cz.cvut.fel.nalida.query.QueryPlan;
 import cz.cvut.fel.nalida.schema.Schema;
 
 @Singleton
-@Path("/kos")
+@Path("kos")
 public class ResponseResource extends AbstractResource {
 
 	public ResponseResource() throws Exception {
