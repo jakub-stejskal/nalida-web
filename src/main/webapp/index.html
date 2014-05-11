@@ -9,7 +9,7 @@
 
   <title>NaLIDa - a natural language interface for database</title>
 
-  <link href="bootstrap.min.css" rel="stylesheet">
+  <link href="webjars/bootstrap/3.1.1/css/bootstrap.min.css" rel="stylesheet">
   <link href="nalida.css" rel="stylesheet">
 
   <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
@@ -120,9 +120,67 @@
 
           <div class="row">
           <h2 id="apidesc">API description</h2>
+            <h3>KOSapi response</h3>
+            <p>The KOSapi response resource retrieves the result data corresponding to the submitted
+            query by generating and executing a RSQL query plan.</p>
+            <dl>
+            <dt>resource URI</dt> <dd><pre>GET /api/kos?q=&lt;query&gt;&t=&lt;interpretationId&gt;</pre></dd>
+            <dt>query parameters</dt>
+              <dd><dl>
+                <dt>query (q)</dt>                <dd>- required parameter, contains the natural language query to be translated.</dd>
+                <dt>interpretationId (t)</dt>     <dd>- optional parameter, identifies the selected interpretation in the case that the query is ambiguous. Value -1 means that the ambiguity should be resolved automatically.</dd>
+              </dl></dd>
+            <dt>produces</dt> <dd>application/xml, text/html</dd>
+            <dt>responses</dt>
+              <dd><dl>
+                <dt>200 OK</dt>                   <dd>- query was successfully translated. The response contains either the result data or a list of possible interpretations in the case of ambiguity.</dd>
+                <dt>400 Bad request</dt>          <dd>- no query was submitted or it was not translatable.</dd>
+                <dt>500 Internal server error</dt><dd>- communication with KOSapi failed.</dd>
+              </dl></dd>
+            </dl>
+
+            <h3>SQL query</h3>
+            <p>The SQL query resource translates the submitted query into a SQL query plan.</p>
+            <dl>
+            <dt>resource URI</dt> <dd><pre>GET /api/kos/sql?q=&lt;query&gt;&t=&lt;interpretationId&gt;</pre></dd>
+            <dt>query parameters</dt>
+              <dd><dl>
+                <dt>query (q)</dt>                <dd>- required parameter, contains the natural language query to be translated.</dd>
+                <dt>interpretationId (t)</dt>     <dd>- optional parameter, identifies the selected interpretation in the case that the query is ambiguous. Value -1 means that the ambiguity should be resolved automatically.</dd>
+              </dl></dd>
+            <dt>produces</dt> <dd>application/xml, text/html</dd>
+            <dt>responses</dt>
+              <dd><dl>
+                <dt>200 OK</dt>                   <dd>- query was successfully translated. The response contains a translation to SQL statement instead of the result data.</dd>
+                <dt>400 Bad request</dt>          <dd>- no query was submitted or it was not translatable.</dd>
+                <dt>500 Internal server error</dt><dd>- communication with KOSapi failed.</dd>
+              </dl></dd>
+            </dl>
+
+            <h3>Detailed intermediate outputs</h3>
+            <p>The detailed intermediate outputs resource provides a textual debugging log concerning
+              RSQL and SQL query plan generation, along with intermediate results and the final
+              XML result.</p>
+            <dl>
+            <dt>resource URI</dt> <dd><pre>GET /api/kos/debug?q=&lt;query&gt;&t=&lt;interpretationId&gt;</pre></dd>
+            <dt>query parameters</dt>
+              <dd><dl>
+                <dt>query (q)</dt>                <dd>- required parameter, contains the natural language query to be translated.</dd>
+                <dt>interpretationId (t)</dt>     <dd>- optional parameter, identifies the selected interpretation in the case that the query is ambiguous. Value -1 means that the ambiguity should be resolved automatically.</dd>
+              </dl></dd>
+            <dt>produces</dt> <dd>text/plain, text/html</dd>
+            <dt>responses</dt>
+              <dd><dl>
+                <dt>200 OK</dt>                   <dd>- query was successfully translated. The response contains a text document with
+                  debug information including the submitted query, the selected interpretation, the
+                  translation to both RSQL and SQL query plans and the result data.</dd>
+                <dt>400 Bad request</dt>          <dd>- no query was submitted or it was not translatable.</dd>
+                <dt>500 Internal server error</dt><dd>- communication with KOSapi failed.</dd>
+              </dl></dd>
+            </dl>
+
 
           </div>
-
           </div>
         </div><!-- /.container -->
 
@@ -141,8 +199,8 @@
 		  </div><!-- /.modal-dialog -->
 		</div><!-- /.modal -->
 
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
-    <script src="bootstrap.min.js"></script>
+    <script src="webjars/jquery/1.11.0/jquery.min.js"></script>
+    <script src="webjars/bootstrap/3.1.1/js/bootstrap.min.js"></script>
     <script>
 
     $('#myModal').on('show.bs.modal', function (e) {
